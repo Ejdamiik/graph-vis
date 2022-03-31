@@ -1,28 +1,12 @@
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Callable
 import tkinter as tk
 
-Value = int
+# --- values to be determined
+Node = str
+Node_value = int
+Tree = str
 
-class BinaryTree:
-
-    def __init__(self, data: Value) -> None:
-
-        self.data = data
-
-        self.left:["BinaryTree"] = None
-        self.right:["BinaryTree"] = None
-
-class Tree:
-
-    def __init__(self, data: Value) -> None:
-
-        self.data = data
-        self.children = []
-
-
-
-
-
+# --- Terminal-based binary tree print
 def number_split(n: int) -> List[int]:
     
     res = [] if n % 2 == 0 else [0]
@@ -35,7 +19,7 @@ def number_split(n: int) -> List[int]:
 
 
 
-def print_tree(tree: BinaryTree) -> None:
+def print_tree(tree: Tree) -> None:
     """
     Text-representation
     """
@@ -47,11 +31,11 @@ def print_tree(tree: BinaryTree) -> None:
     return "\n".join(levels)
 
 
-def _print_levels(tree: Optional[BinaryTree],
+def _print_levels(tree: Tree,
          width: int,
          x: int,
-         levels,
-         i) -> None:
+         levels: List[str],
+         i: int) -> None:
     
     if not tree:
         return
@@ -61,53 +45,68 @@ def _print_levels(tree: Optional[BinaryTree],
     _print_levels(tree.right, width // 2, x + width // 2, levels, i + 1)
 
 
-def place_in_string(string: str, pos: int, val: Value) -> str:
+def place_in_string(string: str, pos: int, val: Node_value) -> str:
 
     return string[:pos] + str(val) + string[pos + 1:]
 
+# ---
 
 
-def draw_tree(tree: BinaryTree, binary: bool = False) -> None:
+
+# --- Tkinter tree visualization
+def draw_tree(tree: Tree,
+              value_getter: Callable[[Node], Node_value],
+              binary: bool = False,
+              redblack: bool = False) -> None:
     """
     Function to draw binary tree graphicaly
+
+    tree = tree structure to be visualized
+    value_getter = function to get value to print
+    binary = bool deciding whether tree is binary
+    redblack = bool deciding whether tree is RBtree
     """
+
     CANVAS_WIDTH = 400
     CANVAS_HEIGHT = 400
 
     canvas = tk.Canvas(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
     canvas.pack()
-    _draw(tree, CANVAS_WIDTH // 2, CANVAS_WIDTH // 2, 40, canvas, None, binary)
+    _draw(tree.root, CANVAS_WIDTH // 2, CANVAS_WIDTH // 2, \
+          40, canvas, None, value_getter, binary, redblack)
+
     canvas.mainloop()
 
 
-def _draw(tree: Optional[BinaryTree],
+def _draw(node: Node,
          width: int,
          x: int,
          y: int,
          canvas: tk.Canvas,
          parent_xy: Optional[Tuple[int, int]],
-         binary: bool) -> None:
+         value_getter: Callable[[Node], Node_value],
+         binary: bool,
+         redblack: bool) -> None:
 
-    if not tree:
+    if not node:
         return
 
-    canvas.create_text(x, y, text = tree.data)
+    if redblack:
+        fill = node.color
+    else:
+        fill = "black"
+
+    canvas.create_text(x, y, text = value_getter(node), fill = fill)
 
     if parent_xy:
         canvas.create_line((x, y - 10), (parent_xy[0], parent_xy[1] + 10))
 
     if binary:
-        _draw(tree.left, width // 2, x - width // 2, y + 40, canvas, (x, y), binary)
-        _draw(tree.right, width // 2, x + width // 2, y + 40, canvas, (x, y), binary)
+        _draw(node.left, width // 2, x - width // 2, y + 40, canvas, (x, y), value_getter, binary, redblack)
+        _draw(node.right, width // 2, x + width // 2, y + 40, canvas, (x, y), value_getter, binary, redblack)
 
     else:
-        for i, child in zip(number_split(len(tree.children)), tree.children):
-            _draw(child, width // len(tree.children), x + i * (width // len(tree.children)), y + 40, canvas, (x, y), binary)
+        for i, child in zip(number_split(len(node.children)), node.children):
+            _draw(child, width // len(node.children), x + i * (width // len(node.children)),
+                  y + 40, canvas, (x, y), value_getter, binary, redblack)
 
-
-t1 = Tree(5)
-
-for i in range(5):
-    t1.children.append(Tree(i))
-
-draw_tree(t1)
