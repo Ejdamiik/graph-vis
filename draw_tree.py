@@ -1,12 +1,11 @@
-from typing import Optional, List, Tuple, Callable
+from typing import Optional, List, Tuple, Callable, Any
 import tkinter as tk
 
 # --- values to be determined
-Node = str
-Node_value = int
-Tree = str
+Node = Any
+Node_value = Any
+Tree = Any
 
-# --- Terminal-based binary tree print
 def number_split(n: int) -> List[int]:
     
     res = [] if n % 2 == 0 else [0]
@@ -19,47 +18,13 @@ def number_split(n: int) -> List[int]:
 
 
 
-def print_tree(tree: Tree) -> None:
-    """
-    Text-representation
-    """
-    width = get_width(tree) * 5
-    height = get_height(tree)
-    levels = [" " * width for _ in range(height)]
-
-    _print_levels(tree, width // 2, width // 2, levels, 0)
-    return "\n".join(levels)
-
-
-def _print_levels(tree: Tree,
-         width: int,
-         x: int,
-         levels: List[str],
-         i: int) -> None:
-    
-    if not tree:
-        return
-
-    levels[i] = place_in_string(levels[i], x, tree.data)
-    _print_levels(tree.left, width // 2, x - width // 2, levels, i + 1)
-    _print_levels(tree.right, width // 2, x + width // 2, levels, i + 1)
-
-
-def place_in_string(string: str, pos: int, val: Node_value) -> str:
-
-    return string[:pos] + str(val) + string[pos + 1:]
-
-# ---
-
-
-
 # --- Tkinter tree visualization
 def draw_tree(tree: Tree,
               value_getter: Callable[[Node], Node_value],
               binary: bool = False,
               redblack: bool = False) -> None:
     """
-    Function to draw binary tree graphicaly
+    Function to draw tree graphicaly
 
     tree = tree structure to be visualized
     value_getter = function to get value to print
@@ -72,7 +37,7 @@ def draw_tree(tree: Tree,
 
     canvas = tk.Canvas(width=CANVAS_WIDTH, height=CANVAS_HEIGHT)
     canvas.pack()
-    _draw(tree.root, CANVAS_WIDTH // 2, CANVAS_WIDTH // 2, \
+    _draw(tree.root_node, CANVAS_WIDTH // 2, CANVAS_WIDTH // 2, \
           40, canvas, None, value_getter, binary, redblack)
 
     canvas.mainloop()
@@ -99,7 +64,7 @@ def _draw(node: Node,
     canvas.create_text(x, y, text = value_getter(node), fill = fill)
 
     if parent_xy:
-        canvas.create_line((x, y - 10), (parent_xy[0], parent_xy[1] + 10))
+        canvas.create_line(x, y - 10, parent_xy[0], parent_xy[1] + 10)
 
     if binary:
         _draw(node.left, width // 2, x - width // 2, y + 40, canvas, (x, y), value_getter, binary, redblack)

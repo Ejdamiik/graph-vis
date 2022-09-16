@@ -35,6 +35,6 @@ class Draw:
 
         x, y = where
         w, h = self.draw.textsize(val)
-        self.draw.text((x - self.node_radius // 2 + w, y - self.node_radius // 2), val, TEXT_COLOR,
+        self.draw.text((x + w, y + h), val, TEXT_COLOR,
                         anchor="ms",  font = self.font)
     #--------------------------------------------------------------#
